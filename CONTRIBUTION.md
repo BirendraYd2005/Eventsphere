@@ -1,18 +1,18 @@
 # Team Contribution Plan
 
-## Member 1
+## Birendra 
 - Repository Setup
 - Frontend UI
 
-## Member 2
+## Durgesh 
 - Backend APIs
 - Authentication
 
-## Member 3
+## Abhimanyu
 - Database Design
 - MongoDB Integration
 
-## Member 4
+## Abhishek
 - Documentation
 - Testing
 - Deployment

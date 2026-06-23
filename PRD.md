@@ -1,10 +1,8 @@
 # Product Requirements Document (PRD)
 
-# Vertex
+# Eventsphere
 
-## Version
 
-1.0
 
 ## Project Theme
 

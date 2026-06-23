@@ -1,0 +1,39 @@
+# Team Contribution Plan
+
+## Member 1
+- Repository Setup
+- Frontend UI
+
+## Member 2
+- Backend APIs
+- Authentication
+
+## Member 3
+- Database Design
+- MongoDB Integration
+
+## Member 4
+- Documentation
+- Testing
+- Deployment
+
+---
+
+## Branch Strategy
+
+- main
+- feature/frontend
+- feature/backend
+- feature/database
+- feature/documentation
+
+---
+
+## Workflow
+
+1. Create a feature branch.
+2. Develop the assigned feature.
+3. Commit changes.
+4. Push the branch.
+5. Create a Pull Request.
+6. Merge into the main branch after review.

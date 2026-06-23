@@ -10,14 +10,14 @@ EventSphere is a web-based event management platform that enables users to disco
 
 ## Team Details
 
-**Team Name:** Your Team Name
+**Team Name:** Innovex
 
 | Name | TECH ID | Role |
 |------|---------|------|
-| Member 1 | TECHXXXX | Frontend Developer |
-| Member 2 | TECHXXXX | Backend Developer |
-| Member 3 | TECHXXXX | Database Developer |
-| Member 4 | TECHXXXX | Testing & Documentation |
+| Birendra | BIRE9CC85B | Frontend Developer |
+| Durgesh | TECH875993 | Backend Developer |
+| Abhimanyu | ABHIDA2E5A | Database Developer |
+| Abhshek | TECHE19340 | Testing & Documentation |
 
 ---
 

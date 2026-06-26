@@ -28,8 +28,8 @@ EventSphere is a web-based event management platform that enables users to disco
 - Tailwind CSS
 
 ### Backend
-- Node.js
-- Express.js
+-  Node.js
+-  Express.js
 
 ### Database
 - MongoDB

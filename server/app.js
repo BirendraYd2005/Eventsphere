@@ -14,17 +14,15 @@ app.use(express.json());
 app.post("/register", (req, res) => {
   const { name, email, password } = req.body;
 
-  db.run(
-    "INSERT INTO users (name, email, password, isAdmin) VALUES (?, ?, ?, 0)",
-    [name, email, password],
-    function (err) {
-      if (err) {
-        return res.status(400).json({ message: "User already exists" });
-      }
+  try {
+    db.prepare(
+      "INSERT INTO users (name, email, password, isAdmin) VALUES (?, ?, ?, 0)"
+    ).run(name, email, password);
 
-      res.json({ message: "Registered ✔" });
-    }
-  );
+    res.json({ message: "Registered ✔" });
+  } catch (err) {
+    return res.status(400).json({ message: "User already exists" });
+  }
 });
 
 /* ================= LOGIN ================= */
@@ -32,36 +30,36 @@ app.post("/register", (req, res) => {
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
 
-  db.get("SELECT * FROM users WHERE email = ?", [email], (err, user) => {
-    if (!user || user.password !== password) {
-      return res.status(400).json({ message: "Invalid login" });
-    }
+  const user = db.prepare("SELECT * FROM users WHERE email = ?").get(email);
 
-    // FIX: ensure number type
-    let isAdmin = Number(user.isAdmin);
+  if (!user || user.password !== password) {
+    return res.status(400).json({ message: "Invalid login" });
+  }
 
-    // special admin email override
-    if (email === "admin@eventsphere.com") {
-      isAdmin = 1;
-    }
+  // FIX: ensure number type
+  let isAdmin = Number(user.isAdmin);
 
-    const token = jwt.sign(
-      {
-        id: user.id,
-        email: user.email,
-        isAdmin: isAdmin,
-      },
-      SECRET,
-      { expiresIn: "1h" }
-    );
+  // special admin email override
+  if (email === "admin@eventsphere.com") {
+    isAdmin = 1;
+  }
 
-    res.json({
-      token,
-      user: {
-        ...user,
-        isAdmin,
-      },
-    });
+  const token = jwt.sign(
+    {
+      id: user.id,
+      email: user.email,
+      isAdmin: isAdmin,
+    },
+    SECRET,
+    { expiresIn: "1h" }
+  );
+
+  res.json({
+    token,
+    user: {
+      ...user,
+      isAdmin,
+    },
   });
 });
 
@@ -94,8 +92,6 @@ function admin(req, res, next) {
 
 /* ================= EVENTS ================= */
 
-/* ================= EVENTS ================= */
-
 app.post("/events", auth, admin, (req, res) => {
   const { title, description, date, poster } = req.body;
 
@@ -108,57 +104,53 @@ app.post("/events", auth, admin, (req, res) => {
     });
   }
 
-  db.run(
-    "INSERT INTO events (title, description, date, poster) VALUES (?, ?, ?, ?)",
-    [title, description, date, poster || ""],
-    function (err) {
-      if (err) {
-        console.log("DB ERROR:", err.message);
+  try {
+    const result = db.prepare(
+      "INSERT INTO events (title, description, date, poster) VALUES (?, ?, ?, ?)"
+    ).run(title, description, date, poster || "");
 
-        return res.status(500).json({
-          message: "Error creating event",
-          error: err.message
-        });
-      }
+    res.json({
+      message: "Event created ✔",
+      id: result.lastInsertRowid,
+    });
+  } catch (err) {
+    console.log("DB ERROR:", err.message);
 
-      res.json({
-        message: "Event created ✔",
-        id: this.lastID,
-      });
-    }
-  );
+    return res.status(500).json({
+      message: "Error creating event",
+      error: err.message
+    });
+  }
 });
 
 app.get("/events", (req, res) => {
-  db.all("SELECT * FROM events", [], (err, rows) => {
-    if (err) {
-      console.log("FETCH ERROR:", err.message);
-
-      return res.status(500).json({
-        message: "Error fetching events",
-        error: err.message
-      });
-    }
-
+  try {
+    const rows = db.prepare("SELECT * FROM events").all();
     res.json(rows);
-  });
+  } catch (err) {
+    console.log("FETCH ERROR:", err.message);
+
+    return res.status(500).json({
+      message: "Error fetching events",
+      error: err.message
+    });
+  }
 });
 
 app.delete("/events/:id", auth, admin, (req, res) => {
   const { id } = req.params;
 
-  db.run("DELETE FROM events WHERE id = ?", [id], function (err) {
-    if (err) {
-      console.log("DELETE ERROR:", err.message);
-
-      return res.status(500).json({
-        message: "Error deleting event",
-        error: err.message
-      });
-    }
-
+  try {
+    db.prepare("DELETE FROM events WHERE id = ?").run(id);
     res.json({ message: "Event deleted ✔" });
-  });
+  } catch (err) {
+    console.log("DELETE ERROR:", err.message);
+
+    return res.status(500).json({
+      message: "Error deleting event",
+      error: err.message
+    });
+  }
 });
 
 /* ================= REGISTRATION ================= */
@@ -167,80 +159,67 @@ app.post("/events/register", auth, (req, res) => {
   const userId = req.user.id;
   const { eventId } = req.body;
 
-  db.get(
-    "SELECT * FROM event_registrations WHERE user_id=? AND event_id=?",
-    [userId, eventId],
-    (err, row) => {
-      if (row) {
-        return res.json({ message: "Already registered" });
-      }
+  const row = db.prepare(
+    "SELECT * FROM event_registrations WHERE user_id=? AND event_id=?"
+  ).get(userId, eventId);
 
-      db.run(
-        "INSERT INTO event_registrations (user_id, event_id) VALUES (?, ?)",
-        [userId, eventId],
-        function (err) {
-          if (err) {
-            return res.status(500).json({ message: "Error registering" });
-          }
+  if (row) {
+    return res.json({ message: "Already registered" });
+  }
 
-          res.json({ message: "Registered ✔" });
-        }
-      );
-    }
-  );
+  try {
+    db.prepare(
+      "INSERT INTO event_registrations (user_id, event_id) VALUES (?, ?)"
+    ).run(userId, eventId);
+
+    res.json({ message: "Registered ✔" });
+  } catch (err) {
+    return res.status(500).json({ message: "Error registering" });
+  }
 });
 
 app.get("/my-events", auth, (req, res) => {
-  db.all(
-    `SELECT events.*
-     FROM events
-     JOIN event_registrations
-     ON events.id = event_registrations.event_id
-     WHERE event_registrations.user_id = ?`,
-    [req.user.id],
-    (err, rows) => {
-      if (err) {
-        return res.status(500).json({ message: "Error fetching my events" });
-      }
+  try {
+    const rows = db.prepare(
+      `SELECT events.*
+       FROM events
+       JOIN event_registrations
+       ON events.id = event_registrations.event_id
+       WHERE event_registrations.user_id = ?`
+    ).all(req.user.id);
 
-      res.json(rows);
-    }
-  );
+    res.json(rows);
+  } catch (err) {
+    return res.status(500).json({ message: "Error fetching my events" });
+  }
 });
 
 /* ================= ADMIN REGISTRATIONS ================= */
 
 app.get("/admin/registrations", auth, admin, (req, res) => {
-  db.all(
-    `SELECT event_registrations.id, users.name, users.email, events.title
-     FROM event_registrations
-     JOIN users ON users.id = event_registrations.user_id
-     JOIN events ON events.id = event_registrations.event_id`,
-    [],
-    (err, rows) => {
-      if (err) {
-        return res.status(500).json({ message: "Error fetching data" });
-      }
+  try {
+    const rows = db.prepare(
+      `SELECT event_registrations.id, users.name, users.email, events.title
+       FROM event_registrations
+       JOIN users ON users.id = event_registrations.user_id
+       JOIN events ON events.id = event_registrations.event_id`
+    ).all();
 
-      res.json(rows);
-    }
-  );
+    res.json(rows);
+  } catch (err) {
+    return res.status(500).json({ message: "Error fetching data" });
+  }
 });
 
 app.delete("/events/register/:id", auth, admin, (req, res) => {
   const { id } = req.params;
 
-  db.run(
-    "DELETE FROM event_registrations WHERE id = ?",
-    [id],
-    function (err) {
-      if (err) {
-        return res.status(500).json({ message: "Error cancelling registration" });
-      }
-
-      res.json({ message: "Registration cancelled ✔" });
-    }
-  );
+  try {
+    db.prepare("DELETE FROM event_registrations WHERE id = ?").run(id);
+    res.json({ message: "Registration cancelled ✔" });
+  } catch (err) {
+    return res.status(500).json({ message: "Error cancelling registration" });
+  }
 });
 
 /* ================= START SERVER ================= */
@@ -248,4 +227,4 @@ app.delete("/events/register/:id", auth, admin, (req, res) => {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-});
+})

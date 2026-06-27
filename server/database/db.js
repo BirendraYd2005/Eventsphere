@@ -1,15 +1,10 @@
-const sqlite3 = require("sqlite3").verbose();
+const Database = require("better-sqlite3");
 
-const db = new sqlite3.Database("./database/eventsphere.db", (err) => {
-  if (err) {
-    console.log(err.message);
-  } else {
-    console.log("SQLite connected ✔");
-  }
-});
+const db = new Database("./database/eventsphere.db");
+console.log("SQLite connected ✔");
 
 /* USERS */
-db.run(`
+db.exec(`
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT,
@@ -20,7 +15,7 @@ db.run(`
 `);
 
 /* EVENTS WITH POSTER */
-db.run(`
+db.exec(`
   CREATE TABLE IF NOT EXISTS events (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT,
@@ -31,7 +26,7 @@ db.run(`
 `);
 
 /* REGISTRATIONS */
-db.run(`
+db.exec(`
   CREATE TABLE IF NOT EXISTS event_registrations (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER,

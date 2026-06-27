@@ -14,15 +14,11 @@ router.post("/register", async (req, res) => {
 
     const sql = "INSERT INTO users (name, email, password) VALUES (?, ?, ?)";
 
-    db.run(sql, [name, email, hashedPassword], function (err) {
-      if (err) {
-        return res.status(400).json({ error: err.message });
-      }
+    const result = db.prepare(sql).run(name, email, hashedPassword);
 
-      res.json({
-        message: "User registered successfully",
-        id: this.lastID
-      });
+    res.json({
+      message: "User registered successfully",
+      id: result.lastInsertRowid
     });
 
   } catch (error) {
@@ -32,13 +28,12 @@ router.post("/register", async (req, res) => {
 
 
 // LOGIN
-router.post("/login", (req, res) => {
+router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
-  const sql = "SELECT * FROM users WHERE email = ?";
-
-  db.get(sql, [email], async (err, user) => {
-    if (err) return res.status(500).json({ error: err.message });
+  try {
+    const sql = "SELECT * FROM users WHERE email = ?";
+    const user = db.prepare(sql).get(email);
 
     if (!user) {
       return res.status(400).json({ message: "User not found" });
@@ -65,7 +60,9 @@ router.post("/login", (req, res) => {
         email: user.email
       }
     });
-  });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 

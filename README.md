@@ -1,4 +1,4 @@
-# 🎉 EventSphere
+# 🎉 EventSphere 🎉
 
 ## Theme
 Event Management Platform

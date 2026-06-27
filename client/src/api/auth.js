@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API = "http://localhost:5000";
+const API = "https://eventsphere-backend-ijp4.onrender.com";
 
 export const registerUser = (data) => {
   return axios.post(`${API}/register`, data);

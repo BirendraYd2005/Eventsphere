@@ -13,6 +13,11 @@ dist
 dist-ssr
 client/dist
 
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
 # IDE
 .idea
 *.iml
@@ -23,8 +28,3 @@ client/dist
 # Logs
 *.log
 npm-debug.log*
-
-# Database files
-*.db
-*.sqlite
-*.sqlite3

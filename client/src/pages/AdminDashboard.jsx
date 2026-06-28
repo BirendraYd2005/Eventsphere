@@ -110,17 +110,16 @@ function AdminDashboard() {
       <style>{`
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        body {
-          background: #0f1117;
+        .admin-page {
           color: #e2e8f0;
           font-family: 'Inter', 'Segoe UI', sans-serif;
           min-height: 100vh;
+          background: #0f1117;
         }
 
         .admin-page {
-          max-width: 1200px;
-          margin: 0 auto;
-          padding: 40px 24px;
+          width: 100%;
+          padding: 40px 48px;
         }
 
         .title {

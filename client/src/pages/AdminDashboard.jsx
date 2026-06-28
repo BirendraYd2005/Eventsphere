@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 
-const BASE_URL = "http://localhost:5000";
+const BASE_URL = "https://eventsphere-backend-ijp4.onrender.com";
 
 function AdminDashboard() {
   const [events, setEvents] = useState([]);
